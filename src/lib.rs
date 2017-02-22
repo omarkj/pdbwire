@@ -12,61 +12,47 @@ named!(mint,
 
 named!(word,
     do_parse!(
-        length: peek!(
-            do_parse!(
+        length: do_parse!(
                 tag: take!(1) >>
                 l: cond_reduce!(tag[0] & 128 == 128, be_u16) >>
                 (l - 128)
-            )) >>
-        bytes: take!(length - 1) >>
+            ) >>
+        bytes: take!(length) >>
         (bytes)
     ));
 
 named!(internal_word,
     do_parse!(
-        length: peek!(
-            do_parse!(
+        length: do_parse!(
                 tag!(&[128u8][..]) >>
                 length: be_u8 >>
                 (length)
-            )) >>
-        bytes: take!(length - 128 + 2) >>
+            ) >>
+        bytes: take!(length - 128) >>
         (bytes)
     ));
 
 named!(small,
     do_parse!(
-        length: peek!(
-            do_parse!(
-                tag!(&[111u8][..]) >>
-                length: be_u8 >>
-                (length)
-            )) >>
-        bytes: take!(length + 2) >>
+        tag!(&[111u8][..]) >>
+        length: be_u8 >>
+        bytes: take!(length) >>
         (bytes)
     ));
 
 named!(medium,
     do_parse!(
-        length: peek!(
-            do_parse!(
-                tag!(&[112u8][..]) >>
-                length: be_u16 >>
-                (length)
-            )) >>
-        bytes: take!(length + 3) >>
+        tag!(&[112u8][..]) >>
+        length: be_u16 >>
+        bytes: take!(length) >>
         (bytes)
     ));
 
 named!(large,
     do_parse!(
-        length: peek!(
-            do_parse!(
-                tag!(&[113u8][..]) >>
-                length: be_u32 >>
-                (length)
-            )) >>
-        bytes: take!(length + 5) >>
+        tag!(&[113u8][..]) >>
+        length: be_u32 >>
+        bytes: take!(length) >>
         (bytes)
     ));
 
@@ -100,7 +86,7 @@ mod tests {
     fn test_small() {
         let d = vec![111u8, 1u8, 101u8];
         let rest: &[u8] = &[];
-        let success: &[u8] = &[111u8, 1u8, 101u8];
+        let success: &[u8] = &[101u8];
         assert_eq!(small(&d), IResult::Done(rest, success));
     }
 
@@ -108,7 +94,7 @@ mod tests {
     fn test_medium() {
         let d = vec![112u8, 0u8, 1u8, 101u8];
         let rest: &[u8] = &[];
-        let success: &[u8] = &[112u8, 0u8, 1u8, 101u8];
+        let success: &[u8] = &[101u8];
         assert_eq!(medium(&d), IResult::Done(rest, success));
     }
 
@@ -116,7 +102,7 @@ mod tests {
     fn test_large() {
         let d = vec![113u8, 0u8, 0u8, 0u8, 1u8, 101u8];
         let rest: &[u8] = &[];
-        let success: &[u8] = &[113u8, 0u8, 0u8, 0u8, 1u8, 101u8];
+        let success: &[u8] = &[101u8];
         assert_eq!(large(&d), IResult::Done(rest, success));
     }
 }
