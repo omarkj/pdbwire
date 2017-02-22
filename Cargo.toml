@@ -1,0 +1,7 @@
+[package]
+name = "pdbwire"
+version = "0.1.0"
+authors = ["Omar Yasin <omarkj@gmail.com>"]
+
+[dependencies]
+nom = "^2.1"
